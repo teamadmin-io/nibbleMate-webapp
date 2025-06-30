@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2015",
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "extends": "expo/tsconfig.base"
+}
