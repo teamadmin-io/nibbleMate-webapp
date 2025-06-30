@@ -4,7 +4,7 @@ A smart cat feeder management system that helps you create, manage, and schedule
 
 ## Overview
 
-NibbleMate is a comprehensive mobile and web application that allows you to:
+nibbleMate is a comprehensive mobile and web application that allows you to:
 
 - **Create and manage smart feeders** with different food brands
 - **Add cats to your household** with detailed profiles
