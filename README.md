@@ -1,4 +1,4 @@
-# NibbleMate 🐱
+# nibbleMate 🐱
 
 A smart cat feeder management system that helps you create, manage, and schedule feeding for your cats through connected smart feeders.
 
