@@ -87,23 +87,27 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const loadDemoState = async () => {
       try {
-        const demoMode = await SecureStore.getItemAsync(DEMO_MODE_KEY);
-        if (demoMode === 'true') {
-          setIsDemoMode(true);
-          
-          // Load demo data
-          const storedFeeders = await SecureStore.getItemAsync(DEMO_FEEDERS_KEY);
-          const storedCats = await SecureStore.getItemAsync(DEMO_CATS_KEY);
-          
-          if (storedFeeders) {
-            setDemoFeeders(JSON.parse(storedFeeders));
-          }
-          if (storedCats) {
-            setDemoCats(JSON.parse(storedCats));
+        // Try to load from SecureStore, but don't fail if it doesn't work
+        if (SecureStore && typeof SecureStore.getItemAsync === 'function') {
+          const demoMode = await SecureStore.getItemAsync(DEMO_MODE_KEY);
+          if (demoMode === 'true') {
+            setIsDemoMode(true);
+            
+            // Load demo data
+            const storedFeeders = await SecureStore.getItemAsync(DEMO_FEEDERS_KEY);
+            const storedCats = await SecureStore.getItemAsync(DEMO_CATS_KEY);
+            
+            if (storedFeeders) {
+              setDemoFeeders(JSON.parse(storedFeeders));
+            }
+            if (storedCats) {
+              setDemoCats(JSON.parse(storedCats));
+            }
           }
         }
       } catch (error) {
-        console.log('Demo: Error loading demo state:', error);
+        console.log('Demo: Error loading demo state (starting fresh):', error);
+        // Continue without loading - demo mode will start fresh
       }
     };
     
@@ -113,15 +117,19 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Save demo state to storage
   const saveDemoState = async (mode: boolean, feeders?: DemoFeeder[], cats?: DemoCat[]) => {
     try {
-      await SecureStore.setItemAsync(DEMO_MODE_KEY, mode.toString());
-      if (feeders) {
-        await SecureStore.setItemAsync(DEMO_FEEDERS_KEY, JSON.stringify(feeders));
-      }
-      if (cats) {
-        await SecureStore.setItemAsync(DEMO_CATS_KEY, JSON.stringify(cats));
+      // Try to save to SecureStore, but don't fail if it doesn't work
+      if (SecureStore && typeof SecureStore.setItemAsync === 'function') {
+        await SecureStore.setItemAsync(DEMO_MODE_KEY, mode.toString());
+        if (feeders) {
+          await SecureStore.setItemAsync(DEMO_FEEDERS_KEY, JSON.stringify(feeders));
+        }
+        if (cats) {
+          await SecureStore.setItemAsync(DEMO_CATS_KEY, JSON.stringify(cats));
+        }
       }
     } catch (error) {
-      console.log('Demo: Error saving demo state:', error);
+      console.log('Demo: Error saving demo state (continuing without persistence):', error);
+      // Continue without persistence - demo mode will still work but reset on app restart
     }
   };
 

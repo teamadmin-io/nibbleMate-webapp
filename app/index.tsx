@@ -26,7 +26,7 @@ export default function Index() {
     );
   }
 
-  // If in demo mode, redirect to home
+  // If in demo mode, show the signed-in dashboard UI
   if (isDemoMode) {
     return <Redirect href="/(home)" />;
   }
@@ -36,7 +36,7 @@ export default function Index() {
     return <Redirect href="/(home)" />;
   }
 
-  // Show demo options if not authenticated
+  // Show landing page if not authenticated and not in demo mode
   return (
     <View style={styles.container}>
       <View style={styles.content}>
