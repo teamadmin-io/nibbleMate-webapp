@@ -60,7 +60,7 @@ export default function Index() {
           />
           
           <Button
-            title="Demo"
+            title="Try Demo Mode"
             variant="secondary"
             onPress={() => {
               enterDemoMode();
@@ -118,16 +118,18 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   demoButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: '#000',
+    borderRadius: 9999,
   },
   signInButton: {
     backgroundColor: '#000000',
   },
   signUpButton: {
     backgroundColor: '#f6f6f6',
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: '#000',
     borderRadius: 9999,
   },
   demoInfo: {
