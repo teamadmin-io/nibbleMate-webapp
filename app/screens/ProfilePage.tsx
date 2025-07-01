@@ -753,8 +753,18 @@ function ProfilePageComponent(): JSX.Element {
     }
     if (isDemoMode) {
       return (
-        <View style={[GlobalStyles.container, { backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' }]}> 
-          <View style={{ padding: 32, borderRadius: 16, backgroundColor: '#f6f6f6', alignItems: 'center', minWidth: 320 }}>
+        <View style={[GlobalStyles.container, { backgroundColor: '#fff' }]}> 
+          <View style={localStyles.headerContainer}>
+            <View style={localStyles.header}>
+              <TouchableOpacity
+                style={GlobalStyles.backButton}
+                onPress={goBack}
+              >
+                <Text style={GlobalStyles.backButtonText}>← Back</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={{ padding: 32, borderRadius: 16, backgroundColor: '#f6f6f6', alignItems: 'center', minWidth: 320, margin: 20 }}>
             <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 12 }}>DEMO USER</Text>
             <Text style={{ fontSize: 16, color: '#888', marginBottom: 8 }}>This is a demo profile.</Text>
             <Text style={{ fontSize: 14, color: '#aaa', marginBottom: 16 }}>No real credentials are shown in demo mode.</Text>
