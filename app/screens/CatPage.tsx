@@ -15,11 +15,10 @@ import { useRouter } from 'expo-router';
 import GlobalStyles from '../../assets/styles/GlobalStyles';
 import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
-import { useCats, useDisassociateCat } from '../utils/features/cats/hooks';
 import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
 import { getFeederDisplayName } from '../utils/helpers/feederHelpers';
-import { useFeeders } from '../utils/features/feeders/hooks';
+import { useCatsSelector, useFeedersSelector, useDisassociateCatSelector } from '../utils/features/demo/hookSelector';
 
 // Define Feeder type for proper typing
 interface Feeder {
@@ -30,13 +29,13 @@ interface Feeder {
 }
 
 const CatPage = (): JSX.Element => {
-  const { cats, loading, refetch } = useCats();
-  const { disassociateCat, loading: deleting } = useDisassociateCat();
+  const { cats, loading, refetch } = useCatsSelector();
+  const { disassociateCat, loading: deleting } = useDisassociateCatSelector();
   const router = useRouter();
   const { width } = useWindowDimensions();
   
   // Use the existing feeders hook instead of manually fetching
-  const { feeders } = useFeeders();
+  const { feeders } = useFeedersSelector();
   
   // Add debugging effect
   useEffect(() => {

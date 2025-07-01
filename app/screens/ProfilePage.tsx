@@ -20,24 +20,24 @@ import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
 import { useRouter } from 'expo-router';
 import { 
-  useSignOut,
-  useProfile, 
-  useProfileEditor
-} from '../utils/features/auth/hooks';
+  useSignOutSelector,
+  useProfileSelector, 
+  useProfileEditorSelector
+} from '../utils/features/demo/hookSelector';
 import { 
-  useFeeders, 
-  useAvailableFeeders, 
-  useAssignHardwareId,
-  useDeleteFeeder,
-  useUnassignCatsFromFeeder
-} from '../utils/features/feeders/hooks';
+  useFeedersSelector, 
+  useAvailableFeedersSelector, 
+  useAssignHardwareIdSelector,
+  useDeleteFeederSelector,
+  useUnassignCatsFromFeederSelector
+} from '../utils/features/demo/hookSelector';
 import { useForm } from '../utils/helpers/forms';
 import { 
   formatHardwareIdForDisplay, 
   validateHardwareId,
   getFeederDisplayName
 } from '../utils/helpers/feederHelpers';
-import { fetchAllCats } from '../utils/features/cats/api';
+import { useFetchAllCatsSelector } from '../utils/features/demo/hookSelector';
 import { useDemo } from '../utils/contexts/DemoProvider';
 
 // Define Cat type
@@ -363,18 +363,19 @@ function ProfilePageComponent(): JSX.Element {
   const router = useRouter();
   const { width } = Dimensions.get('window');
   const styles = getStyles(width);
-  const { signOut, loading: signingOut } = useSignOut();
-  const { profile, loading: loadingProfile, updateUsername } = useProfile();
-  const { feeders, loading: loadingFeeders, refetch: refetchFeeders } = useFeeders();
+  const { signOut, loading: signingOut } = useSignOutSelector();
+  const { profile, loading: loadingProfile, updateUsername } = useProfileSelector();
+  const { feeders, loading: loadingFeeders, refetch: refetchFeeders } = useFeedersSelector();
   const { 
     availableFeeders, 
     loading: loadingAvailableFeeders, 
     refetch: refetchAvailableFeeders 
-  } = useAvailableFeeders();
-  const { assign, loading: assigning } = useAssignHardwareId();
-  const { deleteFeeder, loading: deleting } = useDeleteFeeder();
-  const { unassignCats, loading: unassigningCats } = useUnassignCatsFromFeeder();
+  } = useAvailableFeedersSelector();
+  const { assign, loading: assigning } = useAssignHardwareIdSelector();
+  const { deleteFeeder, loading: deleting } = useDeleteFeederSelector();
+  const { unassignCats, loading: unassigningCats } = useUnassignCatsFromFeederSelector();
   const { isDemoMode } = useDemo();
+  const { fetchAllCats } = useFetchAllCatsSelector();
   
   // State for cats data
   const [cats, setCats] = useState<Cat[]>([]);
@@ -511,7 +512,7 @@ function ProfilePageComponent(): JSX.Element {
     setEditedUsername, 
     startEditing, 
     cancelEditing 
-  } = useProfileEditor();
+  } = useProfileEditorSelector();
   
   // Use the form hook for feeder form inputs
   const { formData: feederForm, updateField: updateFeederField, resetForm: resetFeederForm } = useForm({

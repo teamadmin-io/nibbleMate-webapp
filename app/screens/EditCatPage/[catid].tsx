@@ -7,9 +7,7 @@ import Button from '../../components/Button';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import FeedbackModal from '../../components/FeedbackModal';
 import { showFeedback, ModalType } from '../../utils/helpers/feedbackHelpers';
-import { useCatDetails, useUpdateCat, useDisassociateCat } from '../../utils/features/cats/hooks';
-import { useFeeders } from '../../utils/features/feeders/hooks';
-import { useCats } from '../../utils/features/cats/hooks';
+import { useUpdateCatSelector, useFeedersSelector, useCatsSelector, useCatDetailsSelector, useDisassociateCatSelector } from '../../utils/features/demo/hookSelector';
 import { CatFormData } from '../../utils/features/cats/types';
 import { useForm } from '../../utils/helpers/forms';
 import { getFeederDisplayName } from '../../utils/helpers/feederHelpers';
@@ -45,11 +43,11 @@ const EditCatPage = () => {
   const numericCatId = processedCatId ? parseInt(processedCatId, 10) : null;
   const stringCatId = (numericCatId !== null && !isNaN(numericCatId)) ? String(numericCatId) : undefined;
 
-  const { cat, loading: loadingCat } = useCatDetails(stringCatId!);
-  const { update, loading: updating } = useUpdateCat();
-  const { disassociateCat, loading: deleting } = useDisassociateCat();
-  const { feeders = [], loading: loadingFeeders } = useFeeders();
-  const { cats = [], loading: loadingCats } = useCats();
+  const { cat, loading: loadingCat } = useCatDetailsSelector(stringCatId!);
+  const { update, loading: updating } = useUpdateCatSelector();
+  const { disassociateCat, loading: deleting } = useDisassociateCatSelector();
+  const { feeders = [], loading: loadingFeeders } = useFeedersSelector();
+  const { cats = [], loading: loadingCats } = useCatsSelector();
 
   // Modal state (for web only)
   const [showModal, setShowModal] = useState(false);

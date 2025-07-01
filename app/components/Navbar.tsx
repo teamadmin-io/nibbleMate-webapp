@@ -9,7 +9,7 @@ import GlobalStyles from '../../assets/styles/GlobalStyles'
 export default function Navbar() {
   const router = useRouter()
   const { session, initialized } = useAuth()
-  const { isDemoMode } = useDemo()
+  const { isDemoMode, exitDemoMode } = useDemo()
   const { signOut, loading: signingOut } = useSignOutSelector()
   const pathname = usePathname()
   const { width } = useWindowDimensions();
@@ -58,6 +58,12 @@ export default function Navbar() {
     await signOut();
   }
 
+  // Handle demo mode sign off
+  const handleDemoSignOff = () => {
+    exitDemoMode();
+    router.push('/');
+  }
+
   return (
     <View style={navbarStyle}>
       <TouchableOpacity onPress={() => router.push('/screens/Dashboard')}>
@@ -66,48 +72,60 @@ export default function Navbar() {
           <Text style={styles.demoBadge}>DEMO</Text>
         )}
       </TouchableOpacity>
-      {!isDemoMode && (
-        <View style={GlobalStyles.navLinks}>
-          {session ? (
-            // Authenticated user navigation options
-            <>
-              {/* Don't show Profile button on Profile page, Dashboard or home page */}
-              {!isProfilePage && !isHomePage && !isDashboardPage && (
+      <View style={GlobalStyles.navLinks}>
+        {isDemoMode ? (
+          // Demo mode navigation options
+          <TouchableOpacity 
+            style={[styles.navButton, styles.signOutButton]}
+            onPress={handleDemoSignOff}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.signOutButtonText}>Sign Off Demo</Text>
+          </TouchableOpacity>
+        ) : (
+          // Non-demo mode navigation options
+          <>
+            {session ? (
+              // Authenticated user navigation options
+              <>
+                {/* Don't show Profile button on Profile page, Dashboard or home page */}
+                {!isProfilePage && !isHomePage && !isDashboardPage && (
+                  <TouchableOpacity 
+                    style={[styles.navButton, styles.profileButton]}
+                    onPress={navigateToProfile}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.profileButtonText}>Profile</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity 
-                  style={[styles.navButton, styles.profileButton]}
-                  onPress={navigateToProfile}
+                  style={[styles.navButton, styles.signOutButton]}
+                  onPress={handleSignOut}
+                  disabled={signingOut}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.profileButtonText}>Profile</Text>
+                  {signingOut ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.signOutButtonText}>Sign Out</Text>
+                  )}
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity 
-                style={[styles.navButton, styles.signOutButton]}
-                onPress={handleSignOut}
-                disabled={signingOut}
-                activeOpacity={0.7}
-              >
-                {signingOut ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.signOutButtonText}>Sign Out</Text>
-                )}
-              </TouchableOpacity>
-            </>
-          ) : (
-            // Non-authenticated user navigation options
-            !pathname.includes('sign-in') && !pathname.includes('sign-up') && (
-              <TouchableOpacity 
-                style={styles.navButton}
-                onPress={navigateToSignIn}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.navButtonText}>Sign In</Text>
-              </TouchableOpacity>
-            )
-          )}
-        </View>
-      )}
+              </>
+            ) : (
+              // Non-authenticated user navigation options
+              !pathname.includes('sign-in') && !pathname.includes('sign-up') && (
+                <TouchableOpacity 
+                  style={styles.navButton}
+                  onPress={navigateToSignIn}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.navButtonText}>Sign In</Text>
+                </TouchableOpacity>
+              )
+            )}
+          </>
+        )}
+      </View>
     </View>
   )
 }

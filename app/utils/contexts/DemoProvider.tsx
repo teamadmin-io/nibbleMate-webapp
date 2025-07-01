@@ -31,6 +31,7 @@ interface DemoContextType {
   addDemoFeeder: (name: string, foodbrand: string) => boolean;
   addDemoCat: (catData: Omit<DemoCat, 'catid' | 'created_at'>) => boolean;
   updateDemoCat: (catid: number, updates: Partial<DemoCat>) => void;
+  updateDemoFeeder: (feederid: number, updates: Partial<DemoFeeder>) => void;
   deleteDemoCat: (catid: number) => void;
   linkCatToFeeder: (catid: number, feederid: number) => void;
   unlinkCatFromFeeder: (catid: number) => void;
@@ -133,6 +134,13 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setDemoCats(updatedCats);
   };
 
+  const updateDemoFeeder = (feederid: number, updates: Partial<DemoFeeder>) => {
+    const updatedFeeders = demoFeeders.map(feeder => 
+      feeder.id === feederid ? { ...feeder, ...updates } : feeder
+    );
+    setDemoFeeders(updatedFeeders);
+  };
+
   const deleteDemoCat = (catid: number) => {
     const updatedCats = demoCats.filter(cat => cat.catid !== catid);
     setDemoCats(updatedCats);
@@ -178,6 +186,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     addDemoFeeder,
     addDemoCat,
     updateDemoCat,
+    updateDemoFeeder,
     deleteDemoCat,
     linkCatToFeeder,
     unlinkCatFromFeeder,

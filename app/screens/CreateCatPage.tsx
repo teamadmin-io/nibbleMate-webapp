@@ -7,17 +7,17 @@ import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
 import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
-import { useCreateCat, useCats } from '../utils/features/cats/hooks';
-import { useFeeders } from '../utils/features/feeders/hooks';
+import { useCreateCatSelector, useCatsSelector } from '../utils/features/demo/hookSelector';
+import { useFeedersSelector } from '../utils/features/demo/hookSelector';
 import { CatFormData } from '../utils/features/cats/types';
 import { useForm } from '../utils/helpers/forms';
 import { getFeederDisplayName } from '../utils/helpers/feederHelpers';
 
 const CreateCatPage = () => {
   const router = useRouter();
-  const { feeders = [], loading: loadingFeeders } = useFeeders();
-  const { cats = [], loading: loadingCats } = useCats();
-  const { create, loading: creating } = useCreateCat();
+  const { feeders = [], loading: loadingFeeders } = useFeedersSelector();
+  const { cats = [], loading: loadingCats } = useCatsSelector();
+  const { create, loading: creating } = useCreateCatSelector();
   const [showIOSPicker, setShowIOSPicker] = useState(false);
   const [showIOSSexPicker, setShowIOSSexPicker] = useState(false);
 

@@ -1,10 +1,13 @@
 import { useDemo } from '../../contexts/DemoProvider';
+import { useState, useCallback } from 'react';
 
 // Import real hooks
 import { useFeeders, useFoodBrands, useCreateFeeder, useFeederSchedule } from '../feeders/hooks';
-import { useCats, useCreateCat, useUpdateCat } from '../cats/hooks';
+import { useCats, useCreateCat, useUpdateCat, useCatDetails, useDisassociateCat } from '../cats/hooks';
 import { useSignIn, useSignOut, useProfile, useProfileEditor } from '../auth/hooks';
-import { useAssignHardwareId, useDeleteFeeder } from '../feeders/hooks';
+import { useAssignHardwareId, useDeleteFeeder, useUpdateFeederName, useUpdateFeederFeedAmount, useUpdateFeederFoodBrand, useAvailableFeeders, useUnassignCatsFromFeeder } from '../feeders/hooks';
+import { triggerFeedNow } from '../feeders/api';
+import { fetchAllCats } from '../cats/api';
 
 // Import demo hooks
 import {
@@ -21,7 +24,16 @@ import {
   useDemoProfileEditor,
   useDemoAssignHardwareId,
   useDemoDeleteFeeder,
-  useDemoFeederSchedule
+  useDemoFeederSchedule,
+  useDemoCatDetails,
+  useDemoDisassociateCat,
+  useDemoUpdateFeederName,
+  useDemoUpdateFeederFeedAmount,
+  useDemoUpdateFeederFoodBrand,
+  useDemoAvailableFeeders,
+  useDemoUnassignCatsFromFeeder,
+  useDemoFeedNow,
+  useDemoFetchAllCats
 } from './hooks';
 
 // Hook selector functions
@@ -97,4 +109,75 @@ export const useDeleteFeederSelector = () => {
 export const useFeederScheduleSelector = (feederId: string | number) => {
   const { isDemoMode } = useDemo();
   return isDemoMode ? useDemoFeederSchedule(feederId) : useFeederSchedule(feederId);
+};
+
+export const useCatDetailsSelector = (catid: string | number) => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoCatDetails(catid) : useCatDetails(catid);
+};
+
+export const useDisassociateCatSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoDisassociateCat() : useDisassociateCat();
+};
+
+export const useUpdateFeederNameSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoUpdateFeederName() : useUpdateFeederName();
+};
+
+export const useUpdateFeederFeedAmountSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoUpdateFeederFeedAmount() : useUpdateFeederFeedAmount();
+};
+
+export const useUpdateFeederFoodBrandSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoUpdateFeederFoodBrand() : useUpdateFeederFoodBrand();
+};
+
+export const useAvailableFeedersSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoAvailableFeeders() : useAvailableFeeders();
+};
+
+export const useUnassignCatsFromFeederSelector = () => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoUnassignCatsFromFeeder() : useUnassignCatsFromFeeder();
+};
+
+export const useFeedNowSelector = () => {
+  const { isDemoMode } = useDemo();
+  if (isDemoMode) {
+    return useDemoFeedNow();
+  } else {
+    // For real mode, we need to create a hook-like interface
+    const [loading, setLoading] = useState(false);
+    
+    const triggerFeedNowWrapper = useCallback(async (feederId: number, calories: number) => {
+      setLoading(true);
+      try {
+        const result = await triggerFeedNow(feederId, calories);
+        return result;
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+    
+    return { triggerFeedNow: triggerFeedNowWrapper, loading };
+  }
+};
+
+export const useFetchAllCatsSelector = () => {
+  const { isDemoMode } = useDemo();
+  if (isDemoMode) {
+    return useDemoFetchAllCats();
+  } else {
+    // For real mode, we need to create a hook-like interface
+    const fetchAllCatsWrapper = useCallback(async () => {
+      return await fetchAllCats();
+    }, []);
+    
+    return { fetchAllCats: fetchAllCatsWrapper };
+  }
 }; 

@@ -6,16 +6,16 @@ import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
 import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
-import { useCreateFeeder, useFoodBrands, useFeeders } from '../utils/features/feeders/hooks';
+import { useCreateFeederSelector, useFoodBrandsSelector, useFeedersSelector } from '../utils/features/demo/hookSelector';
 import { WEB_PLATFORM_CONFIG } from '../constants';
 import CrossPlatformModal from '../components/CrossPlatformModal';
 
 const CreateFeeder = React.memo((): JSX.Element => {
   const [foodBrand, setFoodBrand] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const { create, loading: creatingFeeder } = useCreateFeeder();
-  const { foodBrands, loading: loadingBrands, error } = useFoodBrands();
-  const { feeders, loading: loadingFeeders } = useFeeders();
+  const { create, loading: creatingFeeder } = useCreateFeederSelector();
+  const { foodBrands, loading: loadingBrands, error } = useFoodBrandsSelector();
+  const { feeders, loading: loadingFeeders } = useFeedersSelector();
   const router = useRouter();
   const buttonRef = useRef<View>(null);
   const [buttonWidth, setButtonWidth] = useState(300);

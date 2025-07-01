@@ -1,6 +1,21 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDemo } from '../../contexts/DemoProvider';
 import { ScheduleData } from '../feeders/types';
+import { 
+  fetchUserFeeders, 
+  createFeeder as apiCreateFeeder,
+  fetchFoodBrands as apiFetchFoodBrands,
+  deleteFeeder as apiDeleteFeeder,
+  updateFeederName as apiUpdateFeederName,
+  assignHardwareId as apiAssignHardwareId
+} from '../feeders/api';
+import { 
+  fetchAllCats,
+  createCat as apiCreateCat,
+  updateCat as apiUpdateCat,
+  disassociateCat as apiDisassociateCat
+} from '../cats/api';
+import { useAuth } from '../../contexts/AuthProvider';
 
 // Demo feeder hooks
 export const useDemoFeeders = () => {
@@ -65,11 +80,15 @@ export const useDemoCreateFeeder = () => {
 export const useDemoCats = () => {
   const { demoCats } = useDemo();
   
+  const refetch = useCallback(async () => {
+    // In demo mode, no need to refetch since data is local
+    return Promise.resolve();
+  }, []);
+  
   return {
     cats: demoCats,
     loading: false,
-    error: null,
-    refetch: () => {}
+    refetch
   };
 };
 
@@ -104,7 +123,7 @@ export const useDemoUpdateCat = () => {
   const { updateDemoCat } = useDemo();
   const [loading, setLoading] = useState(false);
   
-  const update = useCallback(async (catid: number, updates: any) => {
+  const update = useCallback(async (catid: number, updates: any, skipAlert?: boolean) => {
     setLoading(true);
     try {
       // Simulate API delay
@@ -148,7 +167,7 @@ export const useDemoDeleteCat = () => {
 export const useDemoAssignHardwareId = () => {
   const [loading, setLoading] = useState(false);
   
-  const assignHardwareId = useCallback(async (feederId: number, hardwareId: string) => {
+  const assign = useCallback(async (feederId: number, hardwareId: string) => {
     setLoading(true);
     try {
       // Simulate API delay
@@ -167,7 +186,7 @@ export const useDemoAssignHardwareId = () => {
     }
   }, []);
   
-  return { assignHardwareId, loading };
+  return { assign, loading };
 };
 
 export const useDemoDeleteFeeder = () => {
@@ -245,32 +264,61 @@ export const useDemoProfile = () => {
     created_at: new Date().toISOString()
   };
   
-  return {
-    profile: demoProfile,
-    loading: false,
-    error: null
-  };
-};
-
-export const useDemoProfileEditor = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
-  const updateProfile = useCallback(async (updates: any) => {
+  const fetchProfile = useCallback(async () => {
+    // In demo mode, just return the demo profile
+    return demoProfile;
+  }, []);
+  
+  const updateUsername = useCallback(async (newUsername: string) => {
     setLoading(true);
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
       // In demo mode, just return success
       return true;
     } catch (error) {
+      setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     } finally {
       setLoading(false);
     }
   }, []);
   
-  return { updateProfile, loading };
+  return {
+    profile: demoProfile,
+    loading,
+    error,
+    fetchProfile,
+    updateUsername
+  };
+};
+
+export const useDemoProfileEditor = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUsername, setEditedUsername] = useState('');
+  
+  const startEditing = useCallback((username?: string) => {
+    setIsEditing(true);
+    if (username) {
+      setEditedUsername(username);
+    }
+  }, []);
+  
+  const cancelEditing = useCallback(() => {
+    setIsEditing(false);
+    setEditedUsername('');
+  }, []);
+  
+  return { 
+    isEditing,
+    editedUsername,
+    setEditedUsername,
+    startEditing,
+    cancelEditing
+  };
 };
 
 // Demo feeder schedule hook
@@ -381,4 +429,200 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
     feedNow,
     setSchedule,
   };
+};
+
+// Demo cat details hook
+export const useDemoCatDetails = (catId: string | number) => {
+  const { demoCats } = useDemo();
+  const [loading, setLoading] = useState(false);
+  const [cat, setCat] = useState<any>(null);
+  
+  // Find cat in demo data
+  useEffect(() => {
+    setLoading(true);
+    const numericCatId = typeof catId === 'string' ? parseInt(catId, 10) : catId;
+    const foundCat = demoCats.find(c => c.catid === numericCatId);
+    setCat(foundCat || null);
+    setLoading(false);
+  }, [catId, demoCats]);
+  
+  return { cat, loading };
+};
+
+// Demo disassociate cat hook
+export const useDemoDisassociateCat = () => {
+  const { deleteDemoCat } = useDemo();
+  const [loading, setLoading] = useState(false);
+  
+  const disassociateCat = useCallback(async (catId: number) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      deleteDemoCat(catId);
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [deleteDemoCat]);
+  
+  return { disassociateCat, loading };
+};
+
+// Demo feeder update hooks
+export const useDemoUpdateFeederName = () => {
+  const { updateDemoFeeder } = useDemo();
+  const [loading, setLoading] = useState(false);
+  
+  const updateName = useCallback(async (feederId: number, newName: string) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      updateDemoFeeder(feederId, { name: newName });
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [updateDemoFeeder]);
+  
+  return { updateName, loading };
+};
+
+export const useDemoUpdateFeederFeedAmount = () => {
+  const { updateDemoFeeder } = useDemo();
+  const [loading, setLoading] = useState(false);
+  
+  const updateFeedAmount = useCallback(async (feederId: number, feedAmount: number) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Demo feeders don't have manual_feed_calories, so we'll just return success
+      // In a real implementation, you might want to add this property to DemoFeeder
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [updateDemoFeeder]);
+  
+  return { updateFeedAmount, loading };
+};
+
+export const useDemoUpdateFeederFoodBrand = () => {
+  const { updateDemoFeeder } = useDemo();
+  const [loading, setLoading] = useState(false);
+  
+  const updateFoodBrand = useCallback(async (feederId: number, foodBrand: string) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      updateDemoFeeder(feederId, { foodbrand: foodBrand });
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [updateDemoFeeder]);
+  
+  return { updateFoodBrand, loading };
+};
+
+// Demo available feeders hook
+export const useDemoAvailableFeeders = () => {
+  const { demoFeeders, demoCats } = useDemo();
+  
+  // Get feeders that are not assigned to any cats
+  const availableFeeders = useMemo(() => {
+    const assignedFeederIds = demoCats
+      .map(cat => cat.feederid)
+      .filter(id => id !== null);
+    
+    return demoFeeders.filter(feeder => !assignedFeederIds.includes(feeder.id));
+  }, [demoFeeders, demoCats]);
+  
+  const refetch = useCallback(async () => {
+    // In demo mode, no need to refetch since data is local
+    return Promise.resolve();
+  }, []);
+  
+  return {
+    availableFeeders,
+    loading: false,
+    error: null,
+    refetch
+  };
+};
+
+// Demo unassign cats from feeder hook
+export const useDemoUnassignCatsFromFeeder = () => {
+  const { updateDemoCat } = useDemo();
+  const [loading, setLoading] = useState(false);
+  
+  const unassignCats = useCallback(async (feederId: number) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // In demo mode, we would need to update all cats that have this feeder
+      // For now, just return success
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [updateDemoCat]);
+  
+  return { unassignCats, loading };
+};
+
+// Demo feed now hook
+export const useDemoFeedNow = () => {
+  const [loading, setLoading] = useState(false);
+  
+  const triggerFeedNow = useCallback(async (feederId: number, calories: number) => {
+    setLoading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In demo mode, just return success
+      return true;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  return { triggerFeedNow, loading };
+};
+
+// Demo fetch all cats hook
+export const useDemoFetchAllCats = () => {
+  const { demoCats } = useDemo();
+  
+  const fetchAllCats = useCallback(async () => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return demo cats
+    return demoCats;
+  }, [demoCats]);
+  
+  return { fetchAllCats };
 }; 

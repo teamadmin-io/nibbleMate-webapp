@@ -14,7 +14,7 @@ import {
 import { router, Link } from 'expo-router';
 import GlobalStyles from '../../assets/styles/GlobalStyles';
 import Button from '../components/Button';
-import { useSignInSelector } from '../utils/features/demo/hookSelector';
+import { useSignIn } from '../utils/features/auth/hooks';
 import { useAuth } from '../utils/contexts/AuthProvider';
 import { useDemo } from '../utils/contexts/DemoProvider';
 import { getSession } from '../utils/features/auth/api';
@@ -27,7 +27,7 @@ export default function SignInScreen(): JSX.Element {
   const [emailError, setEmailError] = React.useState('');
   const [passwordError, setPasswordError] = React.useState('');
   const [hasAttemptedSignIn, setHasAttemptedSignIn] = React.useState(false);
-  const { signIn, loading } = useSignInSelector();
+  const { signIn, loading } = useSignIn();
   const { session, initialized } = useAuth();
   const { enterDemoMode } = useDemo();
   const [isCheckingSession, setIsCheckingSession] = React.useState(true);

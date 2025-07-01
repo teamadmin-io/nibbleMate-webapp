@@ -7,7 +7,7 @@ import LoadingIndicator from '../components/LoadingIndicator';
 import { useFeedersSelector } from '../utils/features/demo/hookSelector';
 import { useDemo } from '../utils/contexts/DemoProvider';
 import { formatHardwareIdForDisplay, getFeederDisplayName } from '../utils/helpers/feederHelpers';
-import { triggerFeedNow } from '../utils/features/feeders/api';
+import { useFeedNowSelector } from '../utils/features/demo/hookSelector';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
 import FeedbackModal from '../components/FeedbackModal';
 
@@ -24,6 +24,7 @@ const MainPage = React.memo((): JSX.Element => {
   const { feeders, loading, refetch } = useFeedersSelector();
   const { isDemoMode, demoCats } = useDemo();
   const { width } = useWindowDimensions();
+  const { triggerFeedNow } = useFeedNowSelector();
   
   // Local state for cats data
   const [cats, setCats] = useState<Cat[]>([]);

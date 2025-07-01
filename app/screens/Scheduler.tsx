@@ -6,9 +6,8 @@ import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
 import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
-import { useUpdateFeederName, useFoodBrands, useFeeders, useUpdateFeederFeedAmount, useUpdateFeederFoodBrand } from '../utils/features/feeders/hooks';
-import { useFeederScheduleSelector } from '../utils/features/demo/hookSelector';
-import { fetchAllCats } from '../utils/features/cats/api';
+import { useFeederScheduleSelector, useFoodBrandsSelector, useFeedersSelector, useUpdateFeederNameSelector, useUpdateFeederFeedAmountSelector, useUpdateFeederFoodBrandSelector } from '../utils/features/demo/hookSelector';
+import { useFetchAllCatsSelector } from '../utils/features/demo/hookSelector';
 import { ScheduleData } from '../utils/features/feeders/types';
 
 // Define Cat type
@@ -140,17 +139,18 @@ const Scheduler = (): JSX.Element => {
   const isMountedRef = useRef(true);
   const hasFetchedDataRef = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { fetchAllCats } = useFetchAllCatsSelector();
   
   // State for cat data
   const [associatedCat, setAssociatedCat] = useState<Cat | null>(null);
   const [loadingCat, setLoadingCat] = useState(false);
   
   // Use feeders hook to get the current feeder details
-  const { feeders, refetch: refetchFeeders } = useFeeders();
+  const { feeders, refetch: refetchFeeders } = useFeedersSelector();
   const [currentFeeder, setCurrentFeeder] = useState<any>(null);
   
   // State for food brand data
-  const { foodBrands, loading: loadingFoodBrands } = useFoodBrands();
+  const { foodBrands, loading: loadingFoodBrands } = useFoodBrandsSelector();
   const [currentFeederFoodBrand, setCurrentFeederFoodBrand] = useState<FoodBrand | null>(null);
   
   // State for manual feeding
@@ -170,7 +170,7 @@ const Scheduler = (): JSX.Element => {
   const [maxContentWidth, setMaxContentWidth] = useState(1200);
   
   // Add the feed amount update hook
-  const { updateFeedAmount, loading: updatingFeedAmount } = useUpdateFeederFeedAmount();
+  const { updateFeedAmount, loading: updatingFeedAmount } = useUpdateFeederFeedAmountSelector();
   
   // State for food brand selection
   const [showFoodDropdown, setShowFoodDropdown] = useState(false);
@@ -180,7 +180,7 @@ const Scheduler = (): JSX.Element => {
   const [isEditingFoodBrand, setIsEditingFoodBrand] = useState(false);
   
   // Add the food brand update hook
-  const { updateFoodBrand, loading: updatingFoodBrand } = useUpdateFeederFoodBrand();
+  const { updateFoodBrand, loading: updatingFoodBrand } = useUpdateFeederFoodBrandSelector();
   
   // Handle responsive layout based on screen size - convert to useMemo
   const responsiveLayout = useMemo(() => {
@@ -238,7 +238,7 @@ const Scheduler = (): JSX.Element => {
   // State for name editing
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(feederName || '');
-  const { updateName, loading: updatingName } = useUpdateFeederName();
+  const { updateName, loading: updatingName } = useUpdateFeederNameSelector();
   
   // Use the feeder schedule hook with the processed ID
   const { 
