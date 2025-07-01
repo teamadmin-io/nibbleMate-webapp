@@ -56,6 +56,7 @@ export default function Index() {
             variant="secondary"
             onPress={() => router.push('/(auth)/sign-up')}
             style={styles.signUpButton}
+            textStyle={{ color: '#000', fontWeight: 'bold' }}
           />
           
           <Button
@@ -125,7 +126,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   signUpButton: {
-    backgroundColor: '#808080',
+    backgroundColor: '#f6f6f6',
+    borderWidth: 0,
+    borderRadius: 9999,
   },
   demoInfo: {
     backgroundColor: '#e8f5e9',
