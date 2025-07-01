@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
 
 // Demo data types
 interface DemoFeeder {
@@ -43,11 +42,6 @@ interface DemoContextType {
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
-// Demo storage keys
-const DEMO_MODE_KEY = 'nibblemate_demo_mode';
-const DEMO_FEEDERS_KEY = 'nibblemate_demo_feeders';
-const DEMO_CATS_KEY = 'nibblemate_demo_cats';
-
 // Demo limits
 const MAX_DEMO_FEEDERS = 4;
 const MAX_DEMO_CATS = 4;
@@ -83,68 +77,19 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [demoFeeders, setDemoFeeders] = useState<DemoFeeder[]>(initialDemoFeeders);
   const [demoCats, setDemoCats] = useState<DemoCat[]>(initialDemoCats);
 
-  // Load demo state from storage
-  useEffect(() => {
-    const loadDemoState = async () => {
-      try {
-        // Try to load from SecureStore, but don't fail if it doesn't work
-        if (SecureStore && typeof SecureStore.getItemAsync === 'function') {
-          const demoMode = await SecureStore.getItemAsync(DEMO_MODE_KEY);
-          if (demoMode === 'true') {
-            setIsDemoMode(true);
-            
-            // Load demo data
-            const storedFeeders = await SecureStore.getItemAsync(DEMO_FEEDERS_KEY);
-            const storedCats = await SecureStore.getItemAsync(DEMO_CATS_KEY);
-            
-            if (storedFeeders) {
-              setDemoFeeders(JSON.parse(storedFeeders));
-            }
-            if (storedCats) {
-              setDemoCats(JSON.parse(storedCats));
-            }
-          }
-        }
-      } catch (error) {
-        console.log('Demo: Error loading demo state (starting fresh):', error);
-        // Continue without loading - demo mode will start fresh
-      }
-    };
-    
-    loadDemoState();
-  }, []);
-
-  // Save demo state to storage
-  const saveDemoState = async (mode: boolean, feeders?: DemoFeeder[], cats?: DemoCat[]) => {
-    try {
-      // Try to save to SecureStore, but don't fail if it doesn't work
-      if (SecureStore && typeof SecureStore.setItemAsync === 'function') {
-        await SecureStore.setItemAsync(DEMO_MODE_KEY, mode.toString());
-        if (feeders) {
-          await SecureStore.setItemAsync(DEMO_FEEDERS_KEY, JSON.stringify(feeders));
-        }
-        if (cats) {
-          await SecureStore.setItemAsync(DEMO_CATS_KEY, JSON.stringify(cats));
-        }
-      }
-    } catch (error) {
-      console.log('Demo: Error saving demo state (continuing without persistence):', error);
-      // Continue without persistence - demo mode will still work but reset on app restart
-    }
-  };
+  // Demo mode is now purely in-memory - no persistence
+  // This eliminates all SecureStore issues
 
   const enterDemoMode = () => {
     setIsDemoMode(true);
     setDemoFeeders(initialDemoFeeders);
     setDemoCats(initialDemoCats);
-    saveDemoState(true, initialDemoFeeders, initialDemoCats);
   };
 
   const exitDemoMode = () => {
     setIsDemoMode(false);
     setDemoFeeders([]);
     setDemoCats([]);
-    saveDemoState(false, [], []);
   };
 
   const addDemoFeeder = (name: string, foodbrand: string): boolean => {
@@ -162,7 +107,6 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updatedFeeders = [...demoFeeders, newFeeder];
     setDemoFeeders(updatedFeeders);
-    saveDemoState(true, updatedFeeders, demoCats);
     return true;
   };
 
@@ -179,7 +123,6 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updatedCats = [...demoCats, newCat];
     setDemoCats(updatedCats);
-    saveDemoState(true, demoFeeders, updatedCats);
     return true;
   };
 
@@ -188,13 +131,11 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       cat.catid === catid ? { ...cat, ...updates } : cat
     );
     setDemoCats(updatedCats);
-    saveDemoState(true, demoFeeders, updatedCats);
   };
 
   const deleteDemoCat = (catid: number) => {
     const updatedCats = demoCats.filter(cat => cat.catid !== catid);
     setDemoCats(updatedCats);
-    saveDemoState(true, demoFeeders, updatedCats);
   };
 
   const linkCatToFeeder = (catid: number, feederid: number) => {
@@ -202,7 +143,6 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       cat.catid === catid ? { ...cat, feederid } : cat
     );
     setDemoCats(updatedCats);
-    saveDemoState(true, demoFeeders, updatedCats);
   };
 
   const unlinkCatFromFeeder = (catid: number) => {
@@ -210,7 +150,6 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       cat.catid === catid ? { ...cat, feederid: null } : cat
     );
     setDemoCats(updatedCats);
-    saveDemoState(true, demoFeeders, updatedCats);
   };
 
   const deleteDemoFeeder = (feederid: number) => {
@@ -220,13 +159,11 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
     setDemoFeeders(updatedFeeders);
     setDemoCats(updatedCats);
-    saveDemoState(true, updatedFeeders, updatedCats);
   };
 
   const resetDemoData = () => {
     setDemoFeeders(initialDemoFeeders);
     setDemoCats(initialDemoCats);
-    saveDemoState(true, initialDemoFeeders, initialDemoCats);
   };
 
   const canAddFeeder = demoFeeders.length < MAX_DEMO_FEEDERS;

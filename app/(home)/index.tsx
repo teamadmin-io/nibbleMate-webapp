@@ -2,11 +2,13 @@ import React, { useEffect } from 'react'
 import { Text, View, useWindowDimensions, StyleSheet } from "react-native"
 import { useRouter } from 'expo-router'
 import { useAuth } from '../utils/contexts/AuthProvider'
+import { useDemo } from '../utils/contexts/DemoProvider'
 import GlobalStyles from '../../assets/styles/GlobalStyles'
 import Button from '../components/Button'
 
 export default function HomePage(): JSX.Element {
   const { session, initialized } = useAuth()
+  const { isDemoMode } = useDemo()
   const router = useRouter()
   const { width } = useWindowDimensions()
   
@@ -19,13 +21,17 @@ export default function HomePage(): JSX.Element {
     console.log('🏠 HomePage: Session state', { 
       initialized, 
       hasSession: !!session,
+      isDemoMode,
       sessionDetails: session ? {
         hasAccessToken: !!session.access_token,
         hasRefreshToken: !!session.refresh_token,
         expiresAt: new Date(session.expires_at * 1000).toISOString()
       } : 'No session'
     });
-  }, [session, initialized]);
+  }, [session, initialized, isDemoMode]);
+
+  // Show signed-in UI if authenticated OR in demo mode
+  const showSignedInUI = session || isDemoMode;
 
   return (
     <View style={GlobalStyles.container}>
@@ -33,10 +39,13 @@ export default function HomePage(): JSX.Element {
         <View style={styles.heroSection}>
           <Text style={[GlobalStyles.title, styles.heroTitle]}>Welcome to nibbleMate</Text>
           <Text style={[GlobalStyles.subtitle, styles.heroSubtitle]}>Your Cat's Food Journey Starts Here</Text>
+          {isDemoMode && (
+            <Text style={styles.demoBanner}>🎮 Demo Mode - Explore all features!</Text>
+          )}
         </View>
         
         <View style={styles.buttonContainer}>
-          {session ? (
+          {showSignedInUI ? (
             <>
               <View style={styles.buttonWrapper}>
                 <Button 
@@ -102,6 +111,16 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontSize: 20,
     marginBottom: 24,
+  },
+  demoBanner: {
+    fontSize: 16,
+    color: '#2e7d32',
+    backgroundColor: '#e8f5e9',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 8,
+    fontWeight: 'bold',
   },
   buttonContainer: {
     width: '100%',
