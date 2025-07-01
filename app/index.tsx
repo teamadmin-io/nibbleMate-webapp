@@ -64,7 +64,7 @@ export default function Index() {
             variant="secondary"
             onPress={() => {
               enterDemoMode();
-              router.replace('/screens/MainPage');
+              router.replace('/(home)');
             }}
             style={styles.demoButton}
           />

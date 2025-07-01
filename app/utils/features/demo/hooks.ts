@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useDemo } from '../../contexts/DemoProvider';
-import * as SecureStore from 'expo-secure-store';
 import { ScheduleData } from '../feeders/types';
 
 // Demo feeder hooks
@@ -275,8 +274,6 @@ export const useDemoProfileEditor = () => {
 };
 
 // Demo feeder schedule hook
-const DEMO_SCHEDULES_KEY = 'nibblemate_demo_schedules';
-
 export const useDemoFeederSchedule = (feederId: string | number) => {
   const [scheduleId, setScheduleId] = useState<number | null>(null);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
@@ -301,26 +298,16 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
     lastUpdated: new Date().toISOString()
   });
 
-  // Load schedule from SecureStore
+  // Load schedule - in demo mode, just use default for now
   const fetchSchedule = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const stored = await SecureStore.getItemAsync(DEMO_SCHEDULES_KEY);
-      let schedules: Record<string, any> = {};
-      if (stored) {
-        schedules = JSON.parse(stored);
-      }
-      const key = String(feederId);
-      if (schedules[key]) {
-        setScheduleId(schedules[key].scheduleId || null);
-        setScheduleData(schedules[key].scheduleData || initializeDefaultSchedule());
-        setQuantity(schedules[key].quantity || 100.0);
-      } else {
-        setScheduleId(null);
-        setScheduleData(initializeDefaultSchedule());
-        setQuantity(100.0);
-      }
+      // For demo mode, just use default schedule
+      // In a real implementation, you could store this in the demo context
+      setScheduleId(null);
+      setScheduleData(initializeDefaultSchedule());
+      setQuantity(100.0);
     } catch (e) {
       setScheduleId(null);
       setScheduleData(initializeDefaultSchedule());
@@ -331,28 +318,22 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
     }
   }, [feederId]);
 
-  // Save schedule to SecureStore
+  // Save schedule - in demo mode, just update local state
   const saveSchedule = useCallback(async (newScheduleData: ScheduleData, skipAlert?: boolean, newQuantity?: number) => {
     setSaving(true);
     try {
       const saveQuantity = newQuantity !== undefined ? newQuantity : quantity;
-      const stored = await SecureStore.getItemAsync(DEMO_SCHEDULES_KEY);
-      let schedules: Record<string, any> = {};
-      if (stored) {
-        schedules = JSON.parse(stored);
-      }
-      const key = String(feederId);
       const newId = scheduleId || Date.now();
-      schedules[key] = {
-        scheduleId: newId,
-        scheduleData: newScheduleData,
-        quantity: saveQuantity
-      };
-      await SecureStore.setItemAsync(DEMO_SCHEDULES_KEY, JSON.stringify(schedules));
+      
+      // In demo mode, just update local state
       setScheduleId(newId);
       setScheduleData(newScheduleData);
       setQuantity(saveQuantity);
       setError(null);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       return newId;
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
