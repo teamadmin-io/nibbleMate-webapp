@@ -325,19 +325,28 @@ const Scheduler = (): JSX.Element => {
     const brandName = feeder.brandname;
     if (!brandName) return;
     
-    // Find the food brand details
-    const foodBrand = foodBrands.find(brand => brand.brandName === brandName);
-    setCurrentFeederFoodBrand(foodBrand || null);
+    // Find the food brand details - handle both string and object types
+    const foodBrand = foodBrands.find(brand => {
+      if (typeof brand === 'string') {
+        return brand === brandName;
+      }
+      return brand.brandName === brandName;
+    });
     
-    // Set manual feed amounts from feeder data
-    const calories = feeder.manual_feed_calories ?? 20; // Default to 20 if not set
-    setManualFeedCalories(calories);
-    
-    // Calculate grams based on calories if we have the food brand info
-    if (foodBrand && foodBrand.calories > 0) {
-      const gramsPerCalorie = foodBrand.servSize / foodBrand.calories;
-      const grams = parseFloat((calories * gramsPerCalorie).toFixed(1));
-      setManualFeedGrams(grams);
+    // Only set if it's a proper FoodBrand object
+    if (foodBrand && typeof foodBrand === 'object' && 'brandName' in foodBrand) {
+      setCurrentFeederFoodBrand(foodBrand as FoodBrand);
+      
+      // Set manual feed amounts from feeder data
+      const calories = feeder.manual_feed_calories ?? 20; // Default to 20 if not set
+      setManualFeedCalories(calories);
+      
+      // Calculate grams based on calories if we have the food brand info
+      if (foodBrand.calories > 0) {
+        const gramsPerCalorie = foodBrand.servSize / foodBrand.calories;
+        const grams = parseFloat((calories * gramsPerCalorie).toFixed(1));
+        setManualFeedGrams(grams);
+      }
     }
   }, [feeders, foodBrands, processedFeederId]);
   
@@ -734,10 +743,17 @@ const Scheduler = (): JSX.Element => {
     setSelectedFoodBrand(brand);
     setShowFoodDropdown(false);
     
-    // Find the food brand details
-    const foodBrand = foodBrands.find(b => b.brandName === brand);
-    if (foodBrand) {
-      setCurrentFeederFoodBrand(foodBrand);
+    // Find the food brand details - handle both string and object types
+    const foodBrand = foodBrands.find(b => {
+      if (typeof b === 'string') {
+        return b === brand;
+      }
+      return b.brandName === brand;
+    });
+    
+    // Only set if it's a proper FoodBrand object
+    if (foodBrand && typeof foodBrand === 'object' && 'brandName' in foodBrand) {
+      setCurrentFeederFoodBrand(foodBrand as FoodBrand);
       
       // Recalculate the amounts based on new food brand
       if (manualFeedCalories > 0) {
@@ -755,9 +771,15 @@ const Scheduler = (): JSX.Element => {
       const success = await updateFoodBrand(Number(processedFeederId), brandName, skipAlert);
       
       if (success) {
-        const foodBrand = foodBrands.find(b => b.brandName === brandName);
-        if (foodBrand) {
-          setCurrentFeederFoodBrand(foodBrand);
+        const foodBrand = foodBrands.find(b => {
+          if (typeof b === 'string') {
+            return b === brandName;
+          }
+          return b.brandName === brandName;
+        });
+        
+        if (foodBrand && typeof foodBrand === 'object' && 'brandName' in foodBrand) {
+          setCurrentFeederFoodBrand(foodBrand as FoodBrand);
           setIsEditingFoodBrand(false);
           
           // Show success feedback on all platforms
@@ -1034,7 +1056,7 @@ const Scheduler = (): JSX.Element => {
       {isEditingFoodBrand && (
         <FoodBrandSelector
           isVisible={isEditingFoodBrand}
-          foodBrands={foodBrands}
+          foodBrands={foodBrands.filter(brand => typeof brand === 'object' && 'brandName' in brand) as FoodBrand[]}
           currentBrand={currentFeederFoodBrand}
           onSelect={handleFoodBrandChange}
           onCancel={() => setIsEditingFoodBrand(false)}
@@ -1952,7 +1974,7 @@ const styles = StyleSheet.create<SchedulerStyles>({
     alignSelf: 'center',
   },
   modalOverlayFull: {
-    position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+    position: Platform.OS === 'web' ? ('fixed' as any) : 'absolute',
     top: 0,
     left: 0,
     right: 0,

@@ -31,21 +31,45 @@ export const useDemoFeeders = () => {
 };
 
 export const useDemoFoodBrands = () => {
-  const foodBrands = [
-    'Purina',
-    'Royal Canin',
-    'Science Diet',
-    'Iams',
-    'Fancy Feast',
-    'Friskies',
-    'Whiskas',
-    'Meow Mix'
-  ];
+  const [foodBrands, setFoodBrands] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Use real API call for food brands in demo mode
+  const fetchFoodBrands = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const brands = await apiFetchFoodBrands();
+      setFoodBrands(brands);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      // Fallback to hardcoded brands if API fails
+      setFoodBrands([
+        { brandName: 'Purina', servSize: 100, calories: 400 },
+        { brandName: 'Royal Canin', servSize: 85, calories: 350 },
+        { brandName: 'Science Diet', servSize: 90, calories: 380 },
+        { brandName: 'Iams', servSize: 95, calories: 390 },
+        { brandName: 'Fancy Feast', servSize: 80, calories: 320 },
+        { brandName: 'Friskies', servSize: 85, calories: 340 },
+        { brandName: 'Whiskas', servSize: 90, calories: 360 },
+        { brandName: 'Meow Mix', servSize: 95, calories: 380 }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch food brands on mount
+  useEffect(() => {
+    fetchFoodBrands();
+  }, [fetchFoodBrands]);
   
   return {
     foodBrands,
-    loading: false,
-    error: null
+    loading,
+    error,
+    refetch: fetchFoodBrands
   };
 };
 
@@ -165,6 +189,7 @@ export const useDemoDeleteCat = () => {
 
 // Demo feeder management hooks
 export const useDemoAssignHardwareId = () => {
+  const { updateDemoFeeder } = useDemo();
   const [loading, setLoading] = useState(false);
   
   const assign = useCallback(async (feederId: number, hardwareId: string) => {
@@ -173,10 +198,13 @@ export const useDemoAssignHardwareId = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In demo mode, we just validate the format
+      // In demo mode, validate the format and persist the assignment
       if (!/^\d{12}$/.test(hardwareId.replace(/[-\s]/g, ''))) {
         throw new Error('Hardware ID must be 12 digits');
       }
+      
+      // Persist the hardware ID assignment
+      updateDemoFeeder(feederId, { hardware_id: hardwareId });
       
       return true;
     } catch (error) {
@@ -184,7 +212,7 @@ export const useDemoAssignHardwareId = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateDemoFeeder]);
   
   return { assign, loading };
 };
@@ -257,27 +285,23 @@ export const useDemoSignOut = () => {
 
 // Demo profile hooks
 export const useDemoProfile = () => {
-  const demoProfile = {
-    id: 'demo-user',
-    email: 'demo@nibblemate.com',
-    username: 'Demo User',
-    created_at: new Date().toISOString()
-  };
-  
+  const { demoProfile, updateDemoProfile } = useDemo();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   
   const fetchProfile = useCallback(async () => {
-    // In demo mode, just return the demo profile
+    // In demo mode, return the persistent demo profile
     return demoProfile;
-  }, []);
+  }, [demoProfile]);
   
   const updateUsername = useCallback(async (newUsername: string) => {
     setLoading(true);
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      // In demo mode, just return success
+      
+      // Update the persistent demo profile
+      updateDemoProfile({ username: newUsername });
       return true;
     } catch (error) {
       setError(error instanceof Error ? error : new Error(String(error)));
@@ -285,7 +309,7 @@ export const useDemoProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateDemoProfile]);
   
   return {
     profile: demoProfile,
@@ -323,6 +347,7 @@ export const useDemoProfileEditor = () => {
 
 // Demo feeder schedule hook
 export const useDemoFeederSchedule = (feederId: string | number) => {
+  const { getDemoSchedule, saveDemoSchedule } = useDemo();
   const [scheduleId, setScheduleId] = useState<number | null>(null);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
   const [quantity, setQuantity] = useState<number>(100.0);
@@ -332,6 +357,7 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
 
   // Initialize schedule with default structure
   const initializeDefaultSchedule = (): ScheduleData => ({
+    name: "Default Schedule",
     schedule: {
       Mon: [],
       Tue: [],
@@ -346,16 +372,27 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
     lastUpdated: new Date().toISOString()
   });
 
-  // Load schedule - in demo mode, just use default for now
+  // Load schedule from persistent demo storage
   const fetchSchedule = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // For demo mode, just use default schedule
-      // In a real implementation, you could store this in the demo context
-      setScheduleId(null);
-      setScheduleData(initializeDefaultSchedule());
-      setQuantity(100.0);
+      const numericFeederId = typeof feederId === 'string' ? parseInt(feederId, 10) : feederId;
+      const existingSchedule = getDemoSchedule(numericFeederId);
+      
+      if (existingSchedule) {
+        setScheduleId(numericFeederId);
+        setScheduleData(existingSchedule);
+        setQuantity(100.0);
+      } else {
+        // Create new schedule if none exists
+        const defaultSchedule = initializeDefaultSchedule();
+        setScheduleId(numericFeederId);
+        setScheduleData(defaultSchedule);
+        setQuantity(100.0);
+        // Save the default schedule
+        saveDemoSchedule(numericFeederId, defaultSchedule);
+      }
     } catch (e) {
       setScheduleId(null);
       setScheduleData(initializeDefaultSchedule());
@@ -364,17 +401,20 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
     } finally {
       setLoading(false);
     }
-  }, [feederId]);
+  }, [feederId, getDemoSchedule, saveDemoSchedule]);
 
-  // Save schedule - in demo mode, just update local state
+  // Save schedule to persistent demo storage
   const saveSchedule = useCallback(async (newScheduleData: ScheduleData, skipAlert?: boolean, newQuantity?: number) => {
     setSaving(true);
     try {
+      const numericFeederId = typeof feederId === 'string' ? parseInt(feederId, 10) : feederId;
       const saveQuantity = newQuantity !== undefined ? newQuantity : quantity;
-      const newId = scheduleId || Date.now();
       
-      // In demo mode, just update local state
-      setScheduleId(newId);
+      // Save to persistent demo storage
+      saveDemoSchedule(numericFeederId, newScheduleData);
+      
+      // Update local state
+      setScheduleId(numericFeederId);
       setScheduleData(newScheduleData);
       setQuantity(saveQuantity);
       setError(null);
@@ -382,14 +422,14 @@ export const useDemoFeederSchedule = (feederId: string | number) => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      return newId;
+      return numericFeederId;
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
       throw e;
     } finally {
       setSaving(false);
     }
-  }, [feederId, scheduleId, quantity]);
+  }, [feederId, quantity, saveDemoSchedule]);
 
   // Simulate feed now (no-op in demo)
   const feedNow = useCallback(async (skipAlert?: boolean, calories?: number) => {
@@ -505,8 +545,8 @@ export const useDemoUpdateFeederFeedAmount = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Demo feeders don't have manual_feed_calories, so we'll just return success
-      // In a real implementation, you might want to add this property to DemoFeeder
+      // Update the manual_feed_calories property
+      updateDemoFeeder(feederId, { manual_feed_calories: feedAmount });
       return true;
     } catch (error) {
       throw error;
@@ -522,13 +562,17 @@ export const useDemoUpdateFeederFoodBrand = () => {
   const { updateDemoFeeder } = useDemo();
   const [loading, setLoading] = useState(false);
   
-  const updateFoodBrand = useCallback(async (feederId: number, foodBrand: string) => {
+  const updateFoodBrand = useCallback(async (feederId: number, brandName: string) => {
     setLoading(true);
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      updateDemoFeeder(feederId, { foodbrand: foodBrand });
+      // Update both foodbrand and brandname properties
+      updateDemoFeeder(feederId, { 
+        foodbrand: brandName,
+        brandname: brandName 
+      });
       return true;
     } catch (error) {
       throw error;
@@ -568,7 +612,7 @@ export const useDemoAvailableFeeders = () => {
 
 // Demo unassign cats from feeder hook
 export const useDemoUnassignCatsFromFeeder = () => {
-  const { updateDemoCat } = useDemo();
+  const { unassignAllCatsFromFeeder } = useDemo();
   const [loading, setLoading] = useState(false);
   
   const unassignCats = useCallback(async (feederId: number) => {
@@ -577,15 +621,15 @@ export const useDemoUnassignCatsFromFeeder = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // In demo mode, we would need to update all cats that have this feeder
-      // For now, just return success
+      // Unassign all cats from this feeder
+      unassignAllCatsFromFeeder(feederId);
       return true;
     } catch (error) {
       throw error;
     } finally {
       setLoading(false);
     }
-  }, [updateDemoCat]);
+  }, [unassignAllCatsFromFeeder]);
   
   return { unassignCats, loading };
 };

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { ScheduleData } from '../features/feeders/types';
 
 // Demo data types
 interface DemoFeeder {
@@ -7,6 +8,8 @@ interface DemoFeeder {
   foodbrand: string;
   hardware_id: string | null;
   created_at: string;
+  brandname?: string; // Add for compatibility with real feeder
+  manual_feed_calories?: number; // Add for compatibility with real feeder
 }
 
 interface DemoCat {
@@ -22,10 +25,19 @@ interface DemoCat {
   created_at: string;
 }
 
+interface DemoProfile {
+  id: string;
+  email: string;
+  username: string;
+  created_at: string;
+}
+
 interface DemoContextType {
   isDemoMode: boolean;
   demoFeeders: DemoFeeder[];
   demoCats: DemoCat[];
+  demoSchedules: Record<number, ScheduleData>; // Add schedule storage
+  demoProfile: DemoProfile; // Add profile storage
   enterDemoMode: () => void;
   exitDemoMode: () => void;
   addDemoFeeder: (name: string, foodbrand: string) => boolean;
@@ -39,6 +51,14 @@ interface DemoContextType {
   resetDemoData: () => void;
   canAddFeeder: boolean;
   canAddCat: boolean;
+  // Add schedule management functions
+  getDemoSchedule: (feederId: number) => ScheduleData | null;
+  saveDemoSchedule: (feederId: number, schedule: ScheduleData) => void;
+  deleteDemoSchedule: (feederId: number) => void;
+  // Add profile management functions
+  updateDemoProfile: (updates: Partial<DemoProfile>) => void;
+  // Add unassign cats function
+  unassignAllCatsFromFeeder: (feederId: number) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -54,7 +74,9 @@ const initialDemoFeeders: DemoFeeder[] = [
     name: "My Purina Feeder",
     foodbrand: "Purina",
     hardware_id: "DEMO123456789",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    brandname: "Purina", // Add for compatibility
+    manual_feed_calories: 20 // Add for compatibility
   }
 ];
 
@@ -73,24 +95,54 @@ const initialDemoCats: DemoCat[] = [
   }
 ];
 
+// Initial demo profile data
+const initialDemoProfile: DemoProfile = {
+  id: 'demo-user',
+  email: 'demo@nibblemate.com',
+  username: 'Demo User',
+  created_at: new Date().toISOString()
+};
+
+// Default schedule structure
+const createDefaultSchedule = (): ScheduleData => ({
+  name: "Default Schedule",
+  schedule: {
+    Mon: [],
+    Tue: [],
+    Wed: [],
+    Thu: [],
+    Fri: [],
+    Sat: [],
+    Sun: []
+  },
+  manualFeedCalories: 20,
+  feedingTimes: 0,
+  lastUpdated: new Date().toISOString()
+});
+
 export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [demoFeeders, setDemoFeeders] = useState<DemoFeeder[]>(initialDemoFeeders);
   const [demoCats, setDemoCats] = useState<DemoCat[]>(initialDemoCats);
+  const [demoSchedules, setDemoSchedules] = useState<Record<number, ScheduleData>>({
+    1: createDefaultSchedule() // Initialize with default schedule for first feeder
+  });
+  const [demoProfile, setDemoProfile] = useState<DemoProfile>(initialDemoProfile); // Initialize demo profile
 
-  // Demo mode is now purely in-memory - no persistence
-  // This eliminates all SecureStore issues
-
+  // Demo mode now persists data until sign-out
   const enterDemoMode = () => {
     setIsDemoMode(true);
-    setDemoFeeders(initialDemoFeeders);
-    setDemoCats(initialDemoCats);
+    // Don't reset data - keep existing demo data
   };
 
   const exitDemoMode = () => {
     setIsDemoMode(false);
-    setDemoFeeders([]);
-    setDemoCats([]);
+    setDemoFeeders(initialDemoFeeders);
+    setDemoCats(initialDemoCats);
+    setDemoSchedules({
+      1: createDefaultSchedule()
+    });
+    setDemoProfile(initialDemoProfile);
   };
 
   const addDemoFeeder = (name: string, foodbrand: string): boolean => {
@@ -103,11 +155,20 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       name,
       foodbrand,
       hardware_id: `DEMO${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      brandname: foodbrand, // Add for compatibility
+      manual_feed_calories: 20 // Add for compatibility
     };
 
     const updatedFeeders = [...demoFeeders, newFeeder];
     setDemoFeeders(updatedFeeders);
+    
+    // Create default schedule for new feeder
+    setDemoSchedules(prev => ({
+      ...prev,
+      [newFeeder.id]: createDefaultSchedule()
+    }));
+    
     return true;
   };
 
@@ -167,20 +228,69 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
     setDemoFeeders(updatedFeeders);
     setDemoCats(updatedCats);
+    
+    // Delete schedule for this feeder
+    setDemoSchedules(prev => {
+      const newSchedules = { ...prev };
+      delete newSchedules[feederid];
+      return newSchedules;
+    });
   };
 
   const resetDemoData = () => {
     setDemoFeeders(initialDemoFeeders);
     setDemoCats(initialDemoCats);
+    setDemoSchedules({
+      1: createDefaultSchedule()
+    });
+    setDemoProfile(initialDemoProfile);
+  };
+
+  // Schedule management functions
+  const getDemoSchedule = (feederId: number): ScheduleData | null => {
+    return demoSchedules[feederId] || null;
+  };
+
+  const saveDemoSchedule = (feederId: number, schedule: ScheduleData) => {
+    setDemoSchedules(prev => ({
+      ...prev,
+      [feederId]: {
+        ...schedule,
+        lastUpdated: new Date().toISOString()
+      }
+    }));
+  };
+
+  const deleteDemoSchedule = (feederId: number) => {
+    setDemoSchedules(prev => {
+      const newSchedules = { ...prev };
+      delete newSchedules[feederId];
+      return newSchedules;
+    });
   };
 
   const canAddFeeder = demoFeeders.length < MAX_DEMO_FEEDERS;
   const canAddCat = demoCats.length < MAX_DEMO_CATS;
 
+  // Profile management functions
+  const updateDemoProfile = (updates: Partial<DemoProfile>) => {
+    setDemoProfile(prev => ({ ...prev, ...updates }));
+  };
+
+  // Add unassign cats function
+  const unassignAllCatsFromFeeder = (feederId: number) => {
+    const updatedCats = demoCats.map(cat => 
+      cat.feederid === feederId ? { ...cat, feederid: null } : cat
+    );
+    setDemoCats(updatedCats);
+  };
+
   const value: DemoContextType = {
     isDemoMode,
     demoFeeders,
     demoCats,
+    demoSchedules,
+    demoProfile,
     enterDemoMode,
     exitDemoMode,
     addDemoFeeder,
@@ -193,7 +303,12 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     deleteDemoFeeder,
     resetDemoData,
     canAddFeeder,
-    canAddCat
+    canAddCat,
+    getDemoSchedule,
+    saveDemoSchedule,
+    deleteDemoSchedule,
+    updateDemoProfile,
+    unassignAllCatsFromFeeder
   };
 
   return (
