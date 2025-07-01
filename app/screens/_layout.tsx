@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react'
 import { Stack, useRouter } from 'expo-router'
 import { useAuth } from '../utils/contexts/AuthProvider'
+import { useDemo } from '../utils/contexts/DemoProvider'
 import { Text, View, ActivityIndicator } from 'react-native'
 
 export default function ScreensLayout() {
   const { session, initialized } = useAuth()
+  const { isDemoMode } = useDemo()
   const router = useRouter()
 
   // Check if user is authenticated whenever this component renders
@@ -12,15 +14,16 @@ export default function ScreensLayout() {
   useEffect(() => {
     console.log('🔒 ScreensLayout: Checking auth state', { 
       initialized, 
-      isAuthenticated: !!session 
+      isAuthenticated: !!session, 
+      isDemoMode
     })
     
-    if (initialized && !session) {
+    if (initialized && !session && !isDemoMode) {
       console.log('🔒 ScreensLayout: User is not authenticated, redirecting to home page')
       // Send to home page instead of directly to sign-in, so user sees the home UI with sign-in button
       router.replace('/(home)')
     }
-  }, [initialized, session, router])
+  }, [initialized, session, isDemoMode, router])
 
   // Don't render anything until the auth is initialized
   if (!initialized) {
@@ -33,7 +36,7 @@ export default function ScreensLayout() {
   }
 
   // Don't render the screens if not authenticated
-  if (!session) {
+  if (!session && !isDemoMode) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Please sign in to access this page</Text>
