@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDemo } from '../../contexts/DemoProvider';
+import * as SecureStore from 'expo-secure-store';
+import { ScheduleData } from '../feeders/types';
 
 // Demo feeder hooks
 export const useDemoFeeders = () => {
@@ -270,4 +272,132 @@ export const useDemoProfileEditor = () => {
   }, []);
   
   return { updateProfile, loading };
+};
+
+// Demo feeder schedule hook
+const DEMO_SCHEDULES_KEY = 'nibblemate_demo_schedules';
+
+export const useDemoFeederSchedule = (feederId: string | number) => {
+  const [scheduleId, setScheduleId] = useState<number | null>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+  const [quantity, setQuantity] = useState<number>(100.0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Initialize schedule with default structure
+  const initializeDefaultSchedule = (): ScheduleData => ({
+    schedule: {
+      Mon: [],
+      Tue: [],
+      Wed: [],
+      Thu: [],
+      Fri: [],
+      Sat: [],
+      Sun: []
+    },
+    manualFeedCalories: 20,
+    feedingTimes: 0,
+    lastUpdated: new Date().toISOString()
+  });
+
+  // Load schedule from SecureStore
+  const fetchSchedule = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const stored = await SecureStore.getItemAsync(DEMO_SCHEDULES_KEY);
+      let schedules: Record<string, any> = {};
+      if (stored) {
+        schedules = JSON.parse(stored);
+      }
+      const key = String(feederId);
+      if (schedules[key]) {
+        setScheduleId(schedules[key].scheduleId || null);
+        setScheduleData(schedules[key].scheduleData || initializeDefaultSchedule());
+        setQuantity(schedules[key].quantity || 100.0);
+      } else {
+        setScheduleId(null);
+        setScheduleData(initializeDefaultSchedule());
+        setQuantity(100.0);
+      }
+    } catch (e) {
+      setScheduleId(null);
+      setScheduleData(initializeDefaultSchedule());
+      setQuantity(100.0);
+      setError(e instanceof Error ? e : new Error(String(e)));
+    } finally {
+      setLoading(false);
+    }
+  }, [feederId]);
+
+  // Save schedule to SecureStore
+  const saveSchedule = useCallback(async (newScheduleData: ScheduleData, skipAlert?: boolean, newQuantity?: number) => {
+    setSaving(true);
+    try {
+      const saveQuantity = newQuantity !== undefined ? newQuantity : quantity;
+      const stored = await SecureStore.getItemAsync(DEMO_SCHEDULES_KEY);
+      let schedules: Record<string, any> = {};
+      if (stored) {
+        schedules = JSON.parse(stored);
+      }
+      const key = String(feederId);
+      const newId = scheduleId || Date.now();
+      schedules[key] = {
+        scheduleId: newId,
+        scheduleData: newScheduleData,
+        quantity: saveQuantity
+      };
+      await SecureStore.setItemAsync(DEMO_SCHEDULES_KEY, JSON.stringify(schedules));
+      setScheduleId(newId);
+      setScheduleData(newScheduleData);
+      setQuantity(saveQuantity);
+      setError(null);
+      return newId;
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+      throw e;
+    } finally {
+      setSaving(false);
+    }
+  }, [feederId, scheduleId, quantity]);
+
+  // Simulate feed now (no-op in demo)
+  const feedNow = useCallback(async (skipAlert?: boolean, calories?: number) => {
+    setSaving(true);
+    try {
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setSaving(false);
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+      setSaving(false);
+      return false;
+    }
+  }, []);
+
+  // Function to set the schedule data (used for client-side updates)
+  const setSchedule = useCallback((newScheduleOrUpdater: ScheduleData | ((prev: ScheduleData | null) => ScheduleData | null)) => {
+    setScheduleData(newScheduleOrUpdater);
+  }, []);
+
+  // Fetch on mount/feederId change
+  React.useEffect(() => {
+    fetchSchedule();
+  }, [fetchSchedule]);
+
+  return {
+    scheduleId,
+    scheduleData,
+    schedule: scheduleData, // Alias for compatibility
+    quantity,
+    loading,
+    saving,
+    error,
+    fetchSchedule,
+    saveSchedule,
+    feedNow,
+    setSchedule,
+  };
 }; 

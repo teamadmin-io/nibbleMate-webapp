@@ -1,7 +1,7 @@
 import { useDemo } from '../../contexts/DemoProvider';
 
 // Import real hooks
-import { useFeeders, useFoodBrands, useCreateFeeder } from '../feeders/hooks';
+import { useFeeders, useFoodBrands, useCreateFeeder, useFeederSchedule } from '../feeders/hooks';
 import { useCats, useCreateCat, useUpdateCat } from '../cats/hooks';
 import { useSignIn, useSignOut, useProfile, useProfileEditor } from '../auth/hooks';
 import { useAssignHardwareId, useDeleteFeeder } from '../feeders/hooks';
@@ -20,7 +20,8 @@ import {
   useDemoProfile,
   useDemoProfileEditor,
   useDemoAssignHardwareId,
-  useDemoDeleteFeeder
+  useDemoDeleteFeeder,
+  useDemoFeederSchedule
 } from './hooks';
 
 // Hook selector functions
@@ -91,4 +92,9 @@ export const useAssignHardwareIdSelector = () => {
 export const useDeleteFeederSelector = () => {
   const { isDemoMode } = useDemo();
   return isDemoMode ? useDemoDeleteFeeder() : useDeleteFeeder();
+};
+
+export const useFeederScheduleSelector = (feederId: string | number) => {
+  const { isDemoMode } = useDemo();
+  return isDemoMode ? useDemoFeederSchedule(feederId) : useFeederSchedule(feederId);
 }; 

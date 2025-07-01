@@ -6,7 +6,8 @@ import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
 import FeedbackModal from '../components/FeedbackModal';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
-import { useFeederSchedule, useUpdateFeederName, useFoodBrands, useFeeders, useUpdateFeederFeedAmount, useUpdateFeederFoodBrand } from '../utils/features/feeders/hooks';
+import { useUpdateFeederName, useFoodBrands, useFeeders, useUpdateFeederFeedAmount, useUpdateFeederFoodBrand } from '../utils/features/feeders/hooks';
+import { useFeederScheduleSelector } from '../utils/features/demo/hookSelector';
 import { fetchAllCats } from '../utils/features/cats/api';
 import { ScheduleData } from '../utils/features/feeders/types';
 
@@ -250,7 +251,7 @@ const Scheduler = (): JSX.Element => {
     saveSchedule, 
     feedNow,
     fetchSchedule
-  } = useFeederSchedule(processedFeederId);
+  } = useFeederScheduleSelector(processedFeederId);
   
   // Effect for initial data fetch
   useEffect(() => {
