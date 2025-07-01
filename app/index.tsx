@@ -47,7 +47,7 @@ export default function Index() {
           <Button
             title="Sign In"
             variant="primary"
-            onPress={() => setShowDemoOptions(false)}
+            onPress={() => router.push('/(auth)/sign-in')}
             style={styles.signInButton}
           />
           
@@ -64,7 +64,7 @@ export default function Index() {
             variant="secondary"
             onPress={() => {
               enterDemoMode();
-              setShowDemoOptions(true);
+              router.replace('/screens/MainPage');
             }}
             style={styles.demoButton}
           />

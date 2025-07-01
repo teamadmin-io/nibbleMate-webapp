@@ -66,48 +66,48 @@ export default function Navbar() {
           <Text style={styles.demoBadge}>DEMO</Text>
         )}
       </TouchableOpacity>
-      
-      <View style={GlobalStyles.navLinks}>
-        {session ? (
-          // Authenticated user navigation options
-          <>
-            {/* Don't show Profile button on Profile page, Dashboard or home page */}
-            {!isProfilePage && !isHomePage && !isDashboardPage && (
+      {!isDemoMode && (
+        <View style={GlobalStyles.navLinks}>
+          {session ? (
+            // Authenticated user navigation options
+            <>
+              {/* Don't show Profile button on Profile page, Dashboard or home page */}
+              {!isProfilePage && !isHomePage && !isDashboardPage && (
+                <TouchableOpacity 
+                  style={[styles.navButton, styles.profileButton]}
+                  onPress={navigateToProfile}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.profileButtonText}>Profile</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity 
-                style={[styles.navButton, styles.profileButton]}
-                onPress={navigateToProfile}
+                style={[styles.navButton, styles.signOutButton]}
+                onPress={handleSignOut}
+                disabled={signingOut}
                 activeOpacity={0.7}
               >
-                <Text style={styles.profileButtonText}>Profile</Text>
+                {signingOut ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.signOutButtonText}>Sign Out</Text>
+                )}
               </TouchableOpacity>
-            )}
-            
-            <TouchableOpacity 
-              style={[styles.navButton, styles.signOutButton]}
-              onPress={handleSignOut}
-              disabled={signingOut}
-              activeOpacity={0.7}
-            >
-              {signingOut ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.signOutButtonText}>Sign Out</Text>
-              )}
-            </TouchableOpacity>
-          </>
-        ) : (
-          // Non-authenticated user navigation options
-          !pathname.includes('sign-in') && !pathname.includes('sign-up') && (
-            <TouchableOpacity 
-              style={styles.navButton}
-              onPress={navigateToSignIn}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.navButtonText}>Sign In</Text>
-            </TouchableOpacity>
-          )
-        )}
-      </View>
+            </>
+          ) : (
+            // Non-authenticated user navigation options
+            !pathname.includes('sign-in') && !pathname.includes('sign-up') && (
+              <TouchableOpacity 
+                style={styles.navButton}
+                onPress={navigateToSignIn}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.navButtonText}>Sign In</Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
+      )}
     </View>
   )
 }

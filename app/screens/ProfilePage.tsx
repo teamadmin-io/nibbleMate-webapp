@@ -38,6 +38,7 @@ import {
   getFeederDisplayName
 } from '../utils/helpers/feederHelpers';
 import { fetchAllCats } from '../utils/features/cats/api';
+import { useDemo } from '../utils/contexts/DemoProvider';
 
 // Define Cat type
 interface Cat {
@@ -373,6 +374,7 @@ function ProfilePageComponent(): JSX.Element {
   const { assign, loading: assigning } = useAssignHardwareId();
   const { deleteFeeder, loading: deleting } = useDeleteFeeder();
   const { unassignCats, loading: unassigningCats } = useUnassignCatsFromFeeder();
+  const { isDemoMode } = useDemo();
   
   // State for cats data
   const [cats, setCats] = useState<Cat[]>([]);
@@ -748,6 +750,17 @@ function ProfilePageComponent(): JSX.Element {
         </View>
       );
     }
+    if (isDemoMode) {
+      return (
+        <View style={[GlobalStyles.container, { backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' }]}> 
+          <View style={{ padding: 32, borderRadius: 16, backgroundColor: '#f6f6f6', alignItems: 'center', minWidth: 320 }}>
+            <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 12 }}>DEMO USER</Text>
+            <Text style={{ fontSize: 16, color: '#888', marginBottom: 8 }}>This is a demo profile.</Text>
+            <Text style={{ fontSize: 14, color: '#aaa', marginBottom: 16 }}>No real credentials are shown in demo mode.</Text>
+          </View>
+        </View>
+      );
+    }
     return (
       <ScrollView
         style={localStyles.scrollView}
@@ -863,7 +876,7 @@ function ProfilePageComponent(): JSX.Element {
     profile, saveUsername, cancelEditing, loadingProfile, startEditing, feederForm,
     updateFeederField, availableFeeders, showIOSPicker, setShowIOSPicker,
     handleLinkFeeder, assigning, feeders, router, findCatByFeederId, loadingCats,
-    handleDeleteFeeder, deleting, signOut, signingOut, width
+    handleDeleteFeeder, deleting, signOut, signingOut, width, isDemoMode
   ]);
 
   // Add modal dismissal callbacks
