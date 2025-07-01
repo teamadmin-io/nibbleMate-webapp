@@ -39,9 +39,6 @@ export default function HomePage(): JSX.Element {
         <View style={styles.heroSection}>
           <Text style={[GlobalStyles.title, styles.heroTitle]}>Welcome to nibbleMate</Text>
           <Text style={[GlobalStyles.subtitle, styles.heroSubtitle]}>Your Cat's Food Journey Starts Here</Text>
-          {isDemoMode && (
-            <Text style={styles.demoBanner}>🎮 Demo Mode - Explore all features!</Text>
-          )}
         </View>
         
         <View style={styles.buttonContainer}>
@@ -111,16 +108,6 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontSize: 20,
     marginBottom: 24,
-  },
-  demoBanner: {
-    fontSize: 16,
-    color: '#2e7d32',
-    backgroundColor: '#e8f5e9',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
-    fontWeight: 'bold',
   },
   buttonContainer: {
     width: '100%',

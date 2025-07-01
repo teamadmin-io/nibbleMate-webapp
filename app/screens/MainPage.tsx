@@ -393,15 +393,6 @@ const MainPage = React.memo((): JSX.Element => {
             width: feeders.length * layoutValues.minCardWidth * 1.02 
           }
         ]}>
-          {/* Demo Mode Banner */}
-          {isDemoMode && (
-            <View style={styles.demoBanner}>
-              <Text style={styles.demoBannerText}>
-                🎮 Demo Mode - You can create up to 4 feeders and 4 cats. Data will reset when you exit demo.
-              </Text>
-            </View>
-          )}
-          
           {/* Header section */}
           <View style={styles.headerContainer}>
             <View style={styles.header}>
@@ -618,21 +609,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
     minHeight: 500,
-  },
-  demoBanner: {
-    backgroundColor: '#fff3cd',
-    borderColor: '#ffeaa7',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    width: '100%',
-  },
-  demoBannerText: {
-    fontSize: 14,
-    color: '#856404',
-    textAlign: 'center',
-    fontWeight: '500',
   },
 });
 

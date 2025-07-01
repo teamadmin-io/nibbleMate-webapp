@@ -75,13 +75,25 @@ export default function Navbar() {
       <View style={GlobalStyles.navLinks}>
         {isDemoMode ? (
           // Demo mode navigation options
-          <TouchableOpacity 
-            style={[styles.navButton, styles.signOutButton]}
-            onPress={handleDemoSignOff}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.signOutButtonText}>Sign Off Demo</Text>
-          </TouchableOpacity>
+          <>
+            {/* Don't show Profile button on Profile page, Dashboard or home page */}
+            {!isProfilePage && !isHomePage && !isDashboardPage && (
+              <TouchableOpacity 
+                style={[styles.navButton, styles.profileButton]}
+                onPress={navigateToProfile}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.profileButtonText}>Profile</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={[styles.navButton, styles.signOutButton]}
+              onPress={handleDemoSignOff}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.signOutButtonText}>Sign Off Demo</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           // Non-demo mode navigation options
           <>

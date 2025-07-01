@@ -80,20 +80,7 @@ const initialDemoFeeders: DemoFeeder[] = [
   }
 ];
 
-const initialDemoCats: DemoCat[] = [
-  {
-    catid: 1,
-    catname: "Whiskers",
-    catbreed: "Domestic Shorthair",
-    catage: 3,
-    catweight: 12.5,
-    catlength: 45.0,
-    catsex: "Male",
-    feederid: 1,
-    microchip: "DEMO987654321",
-    created_at: new Date().toISOString()
-  }
-];
+const initialDemoCats: DemoCat[] = []; // Start with no cats - users must create them manually
 
 // Initial demo profile data
 const initialDemoProfile: DemoProfile = {
