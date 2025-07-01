@@ -246,19 +246,6 @@ export default function SignInScreen(): JSX.Element {
               style={styles.button}
             />
 
-            <View style={styles.dividerContainer}>
-              <View style={styles.divider} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.divider} />
-            </View>
-
-            <Button
-              title="Try Demo Mode"
-              variant="secondary"
-              onPress={enterDemoMode}
-              style={styles.demoButton}
-            />
-
             <View style={styles.linkContainer}>
               <Text style={styles.linkText}>Don't have an account? </Text>
               <Link href="/(auth)/sign-up" asChild>
@@ -325,25 +312,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     height: 50
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    marginHorizontal: 15,
-    fontSize: 14,
-    color: '#666',
-  },
-  demoButton: {
-    backgroundColor: '#28a745',
-    marginBottom: 10,
   },
   linkContainer: {
     flexDirection: 'row',
