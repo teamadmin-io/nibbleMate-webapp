@@ -2,13 +2,15 @@ import React, { useMemo } from "react"
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform, useWindowDimensions } from "react-native"
 import { useRouter, usePathname } from "expo-router"
 import { useAuth } from '../utils/contexts/AuthProvider'
-import { useSignOut } from '../utils/features/auth/hooks'
+import { useDemo } from '../utils/contexts/DemoProvider'
+import { useSignOutSelector } from '../utils/features/demo/hookSelector'
 import GlobalStyles from '../../assets/styles/GlobalStyles'
 
 export default function Navbar() {
   const router = useRouter()
   const { session, initialized } = useAuth()
-  const { signOut, loading: signingOut } = useSignOut()
+  const { isDemoMode } = useDemo()
+  const { signOut, loading: signingOut } = useSignOutSelector()
   const pathname = usePathname()
   const { width } = useWindowDimensions();
   
@@ -60,6 +62,9 @@ export default function Navbar() {
     <View style={navbarStyle}>
       <TouchableOpacity onPress={() => router.push('/screens/Dashboard')}>
         <Text style={GlobalStyles.navbarLogo}>nibbleMate</Text>
+        {isDemoMode && (
+          <Text style={styles.demoBadge}>DEMO</Text>
+        )}
       </TouchableOpacity>
       
       <View style={GlobalStyles.navLinks}>
@@ -137,5 +142,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#ffffff",
+  },
+  demoBadge: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#ffffff",
+    backgroundColor: "#ff6b35",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+    overflow: 'hidden',
   }
 });

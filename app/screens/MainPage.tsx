@@ -4,8 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import GlobalStyles from '../../assets/styles/GlobalStyles';
 import Button from '../components/Button';
 import LoadingIndicator from '../components/LoadingIndicator';
-import { useFeeders } from '../utils/features/feeders/hooks';
-import { fetchAllCats } from '../utils/features/cats/api';
+import { useFeedersSelector } from '../utils/features/demo/hookSelector';
+import { useDemo } from '../utils/contexts/DemoProvider';
 import { formatHardwareIdForDisplay, getFeederDisplayName } from '../utils/helpers/feederHelpers';
 import { triggerFeedNow } from '../utils/features/feeders/api';
 import { showFeedback, ModalType } from '../utils/helpers/feedbackHelpers';
@@ -21,7 +21,8 @@ interface Cat {
 // Optimize MainPage component
 const MainPage = React.memo((): JSX.Element => {
   const router = useRouter();
-  const { feeders, loading, refetch } = useFeeders();
+  const { feeders, loading, refetch } = useFeedersSelector();
+  const { isDemoMode, demoCats } = useDemo();
   const { width } = useWindowDimensions();
   
   // Local state for cats data
@@ -38,14 +39,18 @@ const MainPage = React.memo((): JSX.Element => {
   const fetchCats = useCallback(async () => {
     try {
       setFetchingCats(true);
-      const catsData = await fetchAllCats();
-      setCats(Array.isArray(catsData) ? catsData : []);
+      if (isDemoMode) {
+        setCats(demoCats);
+      } else {
+        // In real mode, we would fetch from API
+        setCats([]);
+      }
     } catch (error) {
       setCats([]);
     } finally {
       setFetchingCats(false);
     }
-  }, []);
+  }, [isDemoMode, demoCats]);
   
   // Helper function to find a cat by feeder ID - memoized
   const findCatByFeederId = useCallback((feederId: number): Cat | null => {
@@ -387,6 +392,15 @@ const MainPage = React.memo((): JSX.Element => {
             width: feeders.length * layoutValues.minCardWidth * 1.02 
           }
         ]}>
+          {/* Demo Mode Banner */}
+          {isDemoMode && (
+            <View style={styles.demoBanner}>
+              <Text style={styles.demoBannerText}>
+                🎮 Demo Mode - You can create up to 4 feeders and 4 cats. Data will reset when you exit demo.
+              </Text>
+            </View>
+          )}
+          
           {/* Header section */}
           <View style={styles.headerContainer}>
             <View style={styles.header}>
@@ -603,6 +617,21 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
     minHeight: 500,
+  },
+  demoBanner: {
+    backgroundColor: '#fff3cd',
+    borderColor: '#ffeaa7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    width: '100%',
+  },
+  demoBannerText: {
+    fontSize: 14,
+    color: '#856404',
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

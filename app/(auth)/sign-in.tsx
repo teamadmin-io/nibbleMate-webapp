@@ -14,8 +14,9 @@ import {
 import { router, Link } from 'expo-router';
 import GlobalStyles from '../../assets/styles/GlobalStyles';
 import Button from '../components/Button';
-import { useSignIn } from '../utils/features/auth/hooks';
+import { useSignInSelector } from '../utils/features/demo/hookSelector';
 import { useAuth } from '../utils/contexts/AuthProvider';
+import { useDemo } from '../utils/contexts/DemoProvider';
 import { getSession } from '../utils/features/auth/api';
 import FeedbackModal from '../components/FeedbackModal';
 import { ModalType, showFeedback } from '../utils/helpers/feedbackHelpers';
@@ -26,8 +27,9 @@ export default function SignInScreen(): JSX.Element {
   const [emailError, setEmailError] = React.useState('');
   const [passwordError, setPasswordError] = React.useState('');
   const [hasAttemptedSignIn, setHasAttemptedSignIn] = React.useState(false);
-  const { signIn, loading } = useSignIn();
+  const { signIn, loading } = useSignInSelector();
   const { session, initialized } = useAuth();
+  const { enterDemoMode } = useDemo();
   const [isCheckingSession, setIsCheckingSession] = React.useState(true);
   
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -244,6 +246,19 @@ export default function SignInScreen(): JSX.Element {
               style={styles.button}
             />
 
+            <View style={styles.dividerContainer}>
+              <View style={styles.divider} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.divider} />
+            </View>
+
+            <Button
+              title="Try Demo Mode"
+              variant="secondary"
+              onPress={enterDemoMode}
+              style={styles.demoButton}
+            />
+
             <View style={styles.linkContainer}>
               <Text style={styles.linkText}>Don't have an account? </Text>
               <Link href="/(auth)/sign-up" asChild>
@@ -310,6 +325,25 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     height: 50
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e0e0e0',
+  },
+  dividerText: {
+    marginHorizontal: 15,
+    fontSize: 14,
+    color: '#666',
+  },
+  demoButton: {
+    backgroundColor: '#28a745',
+    marginBottom: 10,
   },
   linkContainer: {
     flexDirection: 'row',
