@@ -67,6 +67,7 @@ export default function Index() {
               router.replace('/(home)');
             }}
             style={styles.demoButton}
+            textStyle={{ color: '#856404', fontWeight: 'bold' }}
           />
         </View>
 
@@ -118,9 +119,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   demoButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
+    backgroundColor: '#fff3cd',
+    borderWidth: 0,
     borderRadius: 9999,
   },
   signInButton: {
@@ -128,8 +128,7 @@ const styles = StyleSheet.create({
   },
   signUpButton: {
     backgroundColor: '#f6f6f6',
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 0,
     borderRadius: 9999,
   },
   demoInfo: {

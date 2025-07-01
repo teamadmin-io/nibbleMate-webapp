@@ -8,7 +8,7 @@ import Button from '../components/Button'
 
 export default function HomePage(): JSX.Element {
   const { session, initialized } = useAuth()
-  const { isDemoMode } = useDemo()
+  const { isDemoMode, enterDemoMode } = useDemo()
   const router = useRouter()
   const { width } = useWindowDimensions()
   
@@ -85,6 +85,24 @@ export default function HomePage(): JSX.Element {
                   title="Sign Up"
                   onPress={() => router.push('/(auth)/sign-up')}
                   style={{ maxWidth: buttonMaxWidth }}
+                />
+              </View>
+              
+              <View style={styles.buttonWrapper}>
+                <Button 
+                  title="Try Demo Mode"
+                  variant="secondary"
+                  onPress={() => {
+                    enterDemoMode();
+                    router.replace('/(home)');
+                  }}
+                  style={{ 
+                    maxWidth: buttonMaxWidth,
+                    backgroundColor: '#fff3cd',
+                    borderWidth: 0,
+                    borderRadius: 9999,
+                  }}
+                  textStyle={{ color: '#856404', fontWeight: 'bold' }}
                 />
               </View>
             </>
