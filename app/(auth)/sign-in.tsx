@@ -165,7 +165,7 @@ export default function SignInScreen(): JSX.Element {
   // Show loading indicator while checking session
   if (isCheckingSession) {
     return (
-      <View style={[GlobalStyles.container, styles.centerContent]}>
+      <View style={[GlobalStyles.container, { backgroundColor: '#fff' }, styles.centerContent]}>
         <ActivityIndicator size="large" color="#007bff" />
         <Text style={styles.loadingText}>Checking authentication...</Text>
       </View>

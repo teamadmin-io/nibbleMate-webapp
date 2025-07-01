@@ -201,7 +201,7 @@ export default function SignUpScreen(): JSX.Element {
       { flex: 1, opacity: fadeAnim }
     ]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={GlobalStyles.container}>
+        <View style={[GlobalStyles.container, { backgroundColor: '#fff' }]}>
           {/* Feedback Modal - works on all web platforms */}
           <FeedbackModal
             visible={showModal}

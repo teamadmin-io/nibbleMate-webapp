@@ -377,7 +377,7 @@ const MainPage = React.memo((): JSX.Element => {
   }, [loading, fetchingCats, feeders, navigateToCreateFeeder]);
 
   return (
-    <View style={GlobalStyles.container}>
+    <View style={[GlobalStyles.container, { backgroundColor: '#fff' }]}>
       <ScrollView 
         style={styles.scrollView} 
         horizontal={layoutValues.useScrolling}
