@@ -41,6 +41,30 @@ export const fetchFoodBrands = async (): Promise<FoodBrand[]> => {
   }
 };
 
+export const fetchPublicFoodBrands = async (): Promise<FoodBrand[]> => {
+  feederDebug('Attempting to fetch public food brands');
+  const startTime = Date.now();
+
+  try {
+    feederDebug('Making GET request', { endpoint: `${API_URL}/public/foodbrands` });
+    
+    const response = await fetch(`${API_URL}/public/foodbrands`);
+    
+    if (!response.ok) {
+      const error = new Error('Failed to fetch public food brands');
+      feederDebug('Request failed', { status: response.status, statusText: response.statusText }, error, startTime);
+      throw error;
+    }
+    
+    const data = await response.json();
+    feederDebug('Successfully fetched public food brands', { count: data.length }, undefined, startTime);
+    return data;
+  } catch (error) {
+    feederDebug('Error fetching public food brands', undefined, error instanceof Error ? error : new Error(String(error)), startTime);
+    throw error;
+  }
+};
+
 export const fetchUserFeeders = async (): Promise<Feeder[]> => {
   feederDebug('Attempting to fetch feeders');
   const startTime = Date.now();

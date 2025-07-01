@@ -5,6 +5,7 @@ import {
   fetchUserFeeders, 
   createFeeder as apiCreateFeeder,
   fetchFoodBrands as apiFetchFoodBrands,
+  fetchPublicFoodBrands as apiFetchPublicFoodBrands,
   deleteFeeder as apiDeleteFeeder,
   updateFeederName as apiUpdateFeederName,
   assignHardwareId as apiAssignHardwareId
@@ -35,29 +36,29 @@ export const useDemoFoodBrands = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Use real API call for food brands in demo mode
+  // In demo mode, always use the fallback brands for consistency
   const fetchFoodBrands = useCallback(async () => {
     setLoading(true);
     setError(null);
-    try {
-      const brands = await apiFetchFoodBrands();
-      setFoodBrands(brands);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      // Fallback to hardcoded brands if API fails
-      setFoodBrands([
-        { brandName: 'Purina', servSize: 100, calories: 400 },
-        { brandName: 'Royal Canin', servSize: 85, calories: 350 },
-        { brandName: 'Science Diet', servSize: 90, calories: 380 },
-        { brandName: 'Iams', servSize: 95, calories: 390 },
-        { brandName: 'Fancy Feast', servSize: 80, calories: 320 },
-        { brandName: 'Friskies', servSize: 85, calories: 340 },
-        { brandName: 'Whiskas', servSize: 90, calories: 360 },
-        { brandName: 'Meow Mix', servSize: 95, calories: 380 }
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    
+    // Simulate a small delay to mimic real API behavior
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Always use fallback brands in demo mode for consistency
+    const fallbackBrands = [
+      { brandName: 'Purina', servSize: 100, calories: 400 },
+      { brandName: 'Royal Canin', servSize: 85, calories: 350 },
+      { brandName: 'Science Diet', servSize: 90, calories: 380 },
+      { brandName: 'Iams', servSize: 95, calories: 390 },
+      { brandName: 'Fancy Feast', servSize: 80, calories: 320 },
+      { brandName: 'Friskies', servSize: 85, calories: 340 },
+      { brandName: 'Whiskas', servSize: 90, calories: 360 },
+      { brandName: 'Meow Mix', servSize: 95, calories: 380 }
+    ];
+    
+    console.log('🔄 Demo mode: Using consistent fallback food brands:', fallbackBrands);
+    setFoodBrands(fallbackBrands);
+    setLoading(false);
   }, []);
 
   // Fetch food brands on mount
