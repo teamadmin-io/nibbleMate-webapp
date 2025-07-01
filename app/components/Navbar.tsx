@@ -76,8 +76,8 @@ export default function Navbar() {
         {isDemoMode ? (
           // Demo mode navigation options
           <>
-            {/* Don't show Profile button on Profile page, Dashboard or home page */}
-            {!isProfilePage && !isHomePage && !isDashboardPage && (
+            {/* Only hide Profile button on Profile page */}
+            {!isProfilePage && (
               <TouchableOpacity 
                 style={[styles.navButton, styles.profileButton]}
                 onPress={navigateToProfile}
